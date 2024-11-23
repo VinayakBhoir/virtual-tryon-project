@@ -23,8 +23,8 @@
    ```
 
 
-## Contributing
- Isha Agrawal   ( rollno: 155 )  
- Vinayak Bhoir  ( rollno: 150 )  
- Pankaj Harer   ( rollno: 231 )  
- Pratik Yelkar  ( rollno: 157 )  
+   ## Contributing
+    Isha Agrawal   ( rollno: 155 )  
+    Vinayak Bhoir  ( rollno: 150 )  
+    Pankaj Harer   ( rollno: 231 )  
+    Pratik Yelkar  ( rollno: 157 )  
