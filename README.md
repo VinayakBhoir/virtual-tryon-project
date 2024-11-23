@@ -17,10 +17,10 @@
     ```
 
    ## Running the Application
-Use the following commands to run the application:
+   Use the following commands to run the application:
    ```bash
     python main.py
-```
+   ```
 
 
 ## Contributing
