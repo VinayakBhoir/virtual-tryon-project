@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Try-On</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Virtual Try-On</h1>
+
+    <div>
+        <img src="{{ url_for('video_feed') }}" width="640" height="480" id="video-feed">
+    </div>
+
+    <div>
+        <button id="change-hat">Change Hat</button>
+        <button id="change-glasses">Change Glasses</button>
+        <button id="change-shirt">Change Shirt</button>
+    </div>
+
+    <script>
+        // Button click handlers to change accessories
+        $('#change-hat').click(function() {
+            $.post('/change_hat');
+        });
+        $('#change-glasses').click(function() {
+            $.post('/change_glasses');
+        });
+        $('#change-shirt').click(function() {
+            $.post('/change_shirt');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+Flask
+opencv-python
+numpy
+opencv-python-headless
+mediapipe
+cvzone
+Pillow
