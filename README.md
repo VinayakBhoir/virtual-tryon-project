@@ -2,7 +2,7 @@
 1. **Install Python**: [Download Python](https://www.python.org/downloads/).
 2. **Clone the repository**:
    ```bash
-   git clone https://github.com/WhisPlayvb/virtual-wardrobe.git
+   https://github.com/VinayakBhoir/virtual-tryon-project.git
     ```
 
 3. Open the project in Visual Studio Code.
