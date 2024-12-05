@@ -6,4 +6,4 @@ mediapipe
 cvzone
 Pillow
 gunicorn
-
+flask-cors
