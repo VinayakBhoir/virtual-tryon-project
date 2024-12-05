@@ -1,4 +1,5 @@
 from flask import Flask, render_template, Response, jsonify
+from flask_socketio import SocketIO, emit
 import cv2
 import os
 import threading
@@ -7,6 +8,7 @@ import cvzone
 from cvzone.PoseModule import PoseDetector
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
 # Load accessories (Ensure paths are correct)
 hat_folder = "data/hat"
@@ -122,6 +124,21 @@ def change_shirt():
     return jsonify({'status': 'success'})
 
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+# WebSocket signaling for WebRTC
+@socketio.on('offer')
+def handle_offer(data):
+    emit('offer', data, broadcast=True)
+
+
+@socketio.on('answer')
+def handle_answer(data):
+    emit('answer', data, broadcast=True)
+
+
+@socketio.on('candidate')
+def handle_candidate(data):
+    emit('candidate', data, broadcast=True)
+
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True, threaded=True)
