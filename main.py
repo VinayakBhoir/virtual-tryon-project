@@ -8,7 +8,7 @@ import cvzone
 from cvzone.PoseModule import PoseDetector
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode='eventlet')  # Specify async_mode
 
 # Load accessories (Ensure paths are correct)
 hat_folder = "data/hat"
@@ -141,4 +141,4 @@ def handle_candidate(data):
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, threaded=True)
+    socketio.run(app, debug=True)  # Removed 'threaded' argument
