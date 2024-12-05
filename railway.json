@@ -1,15 +1,23 @@
 {
-  "name": "virtual-tryon",
+  "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "python",
-    "buildCommand": "pip install -r requirements.txt"
-  },
-  "start": {
-    "command": "python app.py"
+    "builder": "NIXPACKS",
+    "nixpacks": {
+      "phases": {
+        "install": {
+          "commands": [
+            "apt-get update",
+            "apt-get install -y libgl1-mesa-glx"
+          ]
+        }
+      }
+    }
   },
   "deploy": {
-    "numInstances": 1,
-    "healthcheckPath": "/",
-    "autoRedeployOnCrash": true
+    "runtime": "V2",
+    "numReplicas": 1,
+    "sleepApplication": false,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
   }
 }
