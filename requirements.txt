@@ -1,9 +1,11 @@
 Flask
+flask-cors
+flask-socketio
+eventlet
+gunicorn
 opencv-python
-numpy
 opencv-python-headless
+numpy
 mediapipe
 cvzone
 Pillow
-gunicorn
-flask-cors
