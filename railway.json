@@ -1,0 +1,15 @@
+{
+  "name": "virtual-tryon",
+  "build": {
+    "builder": "python",
+    "buildCommand": "pip install -r requirements.txt"
+  },
+  "start": {
+    "command": "python app.py"
+  },
+  "deploy": {
+    "numInstances": 1,
+    "healthcheckPath": "/",
+    "autoRedeployOnCrash": true
+  }
+}
