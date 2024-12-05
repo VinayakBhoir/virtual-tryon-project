@@ -1,8 +1,10 @@
-from flask import Flask, render_template, Response, jsonify
+from flask import Flask, render_template, Response, jsonify, request
 from flask_socketio import SocketIO, emit
 import cv2
 import os
 import logging
+import base64
+import numpy as np
 from virtual_tryon import detect_eyes_and_forehead, overlay_clothing
 import cvzone
 from cvzone.PoseModule import PoseDetector
@@ -60,44 +62,6 @@ def overlay_shirt(frame, lmList, bboxInfo, shirt):
     return frame
 
 
-def generate_frames():
-    """Generate video frames and apply virtual try-on."""
-    global cap, hat_index, glasses_index, shirt_index
-    if not cap:
-        while True:
-            frame = cv2.imread("data/no_camera_placeholder.jpg")  # Placeholder image if no camera is available
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame_bytes = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
-    else:
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            # Flip frame horizontally for mirror effect
-            frame = cv2.flip(frame, 1)
-
-            # Detect pose
-            frame = detector.findPose(frame, draw=False)
-            lmList, bboxInfo = detector.findPosition(frame, bboxWithHands=False, draw=False)
-
-            # Detect eyes and forehead
-            eyes, forehead = detect_eyes_and_forehead(frame, face_cascade, eye_cascade)
-
-            # Overlay accessories (glasses, hat, shirt)
-            frame = overlay_clothing(frame, eyes, forehead, hats[hat_index], glasses_list[glasses_index])
-            frame = overlay_shirt(frame, lmList, bboxInfo, shirts[shirt_index])
-
-            # Encode frame in JPEG for streaming
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame_bytes = buffer.tobytes()
-
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
-
-
 @app.route('/')
 def index():
     """Render home page."""
@@ -107,6 +71,42 @@ def index():
 @app.route('/video_feed')
 def video_feed():
     """Stream video feed."""
+    def generate_frames():
+        global cap, hat_index, glasses_index, shirt_index
+        if not cap:
+            while True:
+                frame = cv2.imread("data/no_camera_placeholder.jpg")  # Placeholder image if no camera is available
+                ret, buffer = cv2.imencode('.jpg', frame)
+                frame_bytes = buffer.tobytes()
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
+        else:
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+
+                # Flip frame horizontally for mirror effect
+                frame = cv2.flip(frame, 1)
+
+                # Detect pose
+                frame = detector.findPose(frame, draw=False)
+                lmList, bboxInfo = detector.findPosition(frame, bboxWithHands=False, draw=False)
+
+                # Detect eyes and forehead
+                eyes, forehead = detect_eyes_and_forehead(frame, face_cascade, eye_cascade)
+
+                # Overlay accessories (glasses, hat, shirt)
+                frame = overlay_clothing(frame, eyes, forehead, hats[hat_index], glasses_list[glasses_index])
+                frame = overlay_shirt(frame, lmList, bboxInfo, shirts[shirt_index])
+
+                # Encode frame in JPEG for streaming
+                ret, buffer = cv2.imencode('.jpg', frame)
+                frame_bytes = buffer.tobytes()
+
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
+
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
@@ -132,6 +132,31 @@ def change_shirt():
     global shirt_index
     shirt_index = (shirt_index + 1) % len(shirts)
     return jsonify({'status': 'success'})
+
+
+@app.route('/process_frame', methods=['POST'])
+def process_frame():
+    """Process frames sent by the browser."""
+    try:
+        data = request.json
+        image_data = data['image']
+
+        # Decode the base64-encoded image
+        image_data = base64.b64decode(image_data.split(',')[1])
+        np_image = np.frombuffer(image_data, np.uint8)
+        frame = cv2.imdecode(np_image, cv2.IMREAD_COLOR)
+
+        # Process the frame (e.g., add virtual accessories)
+        processed_frame = frame  # Placeholder: Add your processing logic here
+
+        # Optionally, encode the processed frame and return it
+        _, buffer = cv2.imencode('.jpg', processed_frame)
+        processed_image_base64 = base64.b64encode(buffer).decode('utf-8')
+
+        return jsonify({'status': 'success', 'image': processed_image_base64})
+    except Exception as e:
+        logger.error(f"Error processing frame: {str(e)}")
+        return jsonify({'status': 'error', 'message': str(e)})
 
 
 # WebSocket signaling for WebRTC
