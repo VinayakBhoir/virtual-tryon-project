@@ -5,30 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Try-On</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        video, canvas {
+            width: 640px;
+            height: 480px;
+            border: 1px solid black;
+        }
+        #controls {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <h1>Virtual Try-On</h1>
 
     <div>
-        <img src="{{ url_for('video_feed') }}" width="640" height="480" id="video-feed">
+        <video id="user-camera" autoplay></video>
+        <canvas id="video-canvas"></canvas>
     </div>
 
-    <div>
+    <div id="controls">
         <button id="change-hat">Change Hat</button>
         <button id="change-glasses">Change Glasses</button>
         <button id="change-shirt">Change Shirt</button>
     </div>
 
     <script>
-        // Button click handlers to change accessories
-        $('#change-hat').click(function() {
-            $.post('/change_hat');
+        // Access the user's webcam
+        const videoElement = document.getElementById('user-camera');
+        const canvasElement = document.getElementById('video-canvas');
+        const canvasContext = canvasElement.getContext('2d');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                videoElement.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Error accessing webcam: ", err);
+            });
+
+        // Continuously draw the video frame onto the canvas
+        function drawVideoFrame() {
+            canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+            requestAnimationFrame(drawVideoFrame);
+        }
+        drawVideoFrame();
+
+        // Button click handlers to send commands to the server
+        $('#change-hat').click(function () {
+            $.post('/change_hat', {}, function(response) {
+                console.log('Hat changed:', response);
+            });
         });
-        $('#change-glasses').click(function() {
-            $.post('/change_glasses');
+
+        $('#change-glasses').click(function () {
+            $.post('/change_glasses', {}, function(response) {
+                console.log('Glasses changed:', response);
+            });
         });
-        $('#change-shirt').click(function() {
-            $.post('/change_shirt');
+
+        $('#change-shirt').click(function () {
+            $.post('/change_shirt', {}, function(response) {
+                console.log('Shirt changed:', response);
+            });
         });
     </script>
 </body>
